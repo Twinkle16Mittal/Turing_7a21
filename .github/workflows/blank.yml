@@ -1,36 +1,25 @@
-name: Build and Deploy
+name: Setup and Use Environment Variables
 
-on:
-  push:
-    branches:
-      - main
+on: [push]
 
 jobs:
-  build:
+  job1:
     runs-on: ubuntu-latest
-
     env:
-      SERVICE_NAME: "my-web-app"
-      ENVIRONMENT: test
-      # DEPLOY_COMMAND won't be defined here
-      # Let's define it based on other variables
-
+      VAR1: 'value1'
+      # This does not reference VAR2 directly
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Set VAR2
+        run: echo "Creating VAR2 from VAR1"
+        shell: bash
+        env:
+          VAR2: '${{ steps.job1-env.VAR1 }}-suffix'
 
-      - name: Build the application
-        run: |
-          echo "Building $SERVICE_NAME for $ENVIRONMENT environment"
-
-      - name: Deploy
-        run: |
-          # Example: DEPLOY_COMMAND is set based on SERVICE_NAME and ENVIRONMENT
-          if [ $ENVIRONMENT == "test" ]; then
-            DEPLOY_COMMAND="deploy-test.sh"
-          elif [ $ENVIRONMENT == "staging" ]; then
-            DEPLOY_COMMAND="deploy-staging.sh"
-          else
-            DEPLOY_COMMAND="deploy.sh"
-          fi
-          ./$DEPLOY_COMMAND
+  job2:
+    needs: job1
+    runs-on: ubuntu-latest
+    env:
+      VAR3: '${{ needs.job1.outputs.VAR2 }}'
+    steps:
+      - name: Use VAR3
+        run: echo "VAR3 is set to ${{ env.VAR3 }}"
