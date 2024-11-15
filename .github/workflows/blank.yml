@@ -3,23 +3,22 @@ name: Setup and Use Environment Variables
 on: [push]
 
 jobs:
-  job1:
-    runs-on: ubuntu-latest
+  test:
     env:
-      VAR1: 'value1'
-      # This does not reference VAR2 directly
-    steps:
-      - name: Set VAR2
-        run: echo "Creating VAR2 from VAR1"
-        shell: bash
-        env:
-          VAR2: '${{ steps.job1-env.VAR1 }}-suffix'
-
-  job2:
-    needs: job1
+      SAMPLE_ENV_VAR: 'test val'
     runs-on: ubuntu-latest
-    env:
-      VAR3: '${{ needs.job1.outputs.VAR2 }}'
     steps:
-      - name: Use VAR3
-        run: echo "VAR3 is set to ${{ env.VAR3 }}"
+      - name: Print SAMPLE_ENV_VAR
+        run: echo "SAMPLE_ENV_VAR=${{ env.SAMPLE_ENV_VAR }}"
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        flavor: [plain, rust]
+    env:
+      SAMPLE_ENV_VAR: ${{ matrix.flavor }}
+    steps:
+      - name: Print flavor and SAMPLE_ENV_VAR
+        run: |
+          echo "Flavor: ${{ matrix.flavor }}"
+          echo "SAMPLE_ENV_VAR: $SAMPLE_ENV_VAR"
