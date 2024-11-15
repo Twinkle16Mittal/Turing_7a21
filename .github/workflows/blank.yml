@@ -1,0 +1,36 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      SERVICE_NAME: "my-web-app"
+      ENVIRONMENT: test
+      # DEPLOY_COMMAND won't be defined here
+      # Let's define it based on other variables
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build the application
+        run: |
+          echo "Building $SERVICE_NAME for $ENVIRONMENT environment"
+
+      - name: Deploy
+        run: |
+          # Example: DEPLOY_COMMAND is set based on SERVICE_NAME and ENVIRONMENT
+          if [ $ENVIRONMENT == "test" ]; then
+            DEPLOY_COMMAND="deploy-test.sh"
+          elif [ $ENVIRONMENT == "staging" ]; then
+            DEPLOY_COMMAND="deploy-staging.sh"
+          else
+            DEPLOY_COMMAND="deploy.sh"
+          fi
+          ./$DEPLOY_COMMAND
